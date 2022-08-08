@@ -23,25 +23,25 @@ import { ethers } from "hardhat";
 // });
 
 const main = async () => {
-  const [owner, randomPerson] = await ethers.getSigners();
+  // ES8 async / await for promises
+  // const [owner, randomPerson] = await ethers.getSigners();
   const domainContractFactory = await ethers.getContractFactory("Domains");
-  const domainContract = await domainContractFactory.deploy();
+  const domainContract = await domainContractFactory.deploy("cool");
   await domainContract.deployed();
 
   console.log("Contract deployed to: ", domainContract.address);
-  console.log("contract deployed by: ", owner.address);
+  // console.log("contract deployed by: ", owner.address);
 
-  let txn = await domainContract.register("doom");
+  let txn = await domainContract.register("mortal", {
+    value: ethers.utils.parseEther("1"),
+  });
   await txn.wait();
 
-  const domainAddress = await domainContract.getAddress("doom");
+  const domainAddress = await domainContract.getAddress("mortal");
   console.log("owner of the domain: ", domainAddress);
 
-  // Trying to set a record that doesn't belong to me!
-  txn = await domainContract
-    .connect(randomPerson)
-    .setRecord("doom", "Haha my domain now!");
-  await txn.wait();
+  const balance = await ethers.provider.getBalance(domainContract.address);
+  console.log("Contract balance:", ethers.utils.formatEther(balance));
 };
 
 // run main()
@@ -49,3 +49,40 @@ main().catch((error) => {
   console.log(error);
   process.exitCode = 1;
 });
+
+// const main = async () => {
+//   const domainContractFactory = await hre.ethers.getContractFactory("Domains");
+//   const domainContract = await domainContractFactory.deploy("ninja");
+//   await domainContract.deployed();
+
+//   console.log("Contract deployed to:", domainContract.address);
+
+//   // CHANGE THIS DOMAIN TO SOMETHING ELSE! I don't want to see OpenSea full of bananas lol
+//   let txn = await domainContract.register("banana", {
+//     value: hre.ethers.utils.parseEther("0.1"),
+//   });
+//   await txn.wait();
+//   console.log("Minted domain banana.ninja");
+
+//   txn = await domainContract.setRecord("banana", "Am I a banana or a ninja??");
+//   await txn.wait();
+//   console.log("Set record for banana.ninja");
+
+//   const address = await domainContract.getAddress("banana");
+//   console.log("Owner of domain banana:", address);
+
+//   const balance = await hre.ethers.provider.getBalance(domainContract.address);
+//   console.log("Contract balance:", hre.ethers.utils.formatEther(balance));
+// };
+
+// const runMain = async () => {
+//   try {
+//     await main();
+//     process.exit(0);
+//   } catch (error) {
+//     console.log(error);
+//     process.exit(1);
+//   }
+// };
+
+// runMain();
